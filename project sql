@@ -1,0 +1,754 @@
+create table tipuri_camere ( 
+id_tip number(3) primary key, 
+denumire_camera varchar2(30) not null,
+constraint ck_camera_valida check (denumire_camera in ('STANDARD', 'DELUXE', 'SUITE')),
+pret_noapte number (6,2), 
+constraint ck_pret check (pret_noapte>0), 
+capacitate number (2)
+);
+
+create table camere( 
+id_camera number(4) primary key, 
+etaj number(2) not null,
+vedere_mare varchar2(2) check (vedere_mare in('DA', 'NU')),
+id_tip number (3),
+constraint fk_tip_camera foreign key (id_tip) references tipuri_camere(id_tip)
+);
+
+create table turisti( 
+id_turist number(5) primary key,
+nume varchar2(20) not null,
+prenume varchar2(30) not null, 
+nr_telefon varchar2(15),
+email varchar2(50) unique,
+constraint ck_email_valid check (email like '%@%')
+);
+
+create table angajati_hotel( 
+id_angajat number(6) primary key, 
+nume varchar2(20) not null,
+prenume varchar2(30) not null,
+functie varchar(20) not null,
+salariu number (8,2),
+data_angajare date default sysdate,
+constraint ck_functie check (functie in ('Manager', 'Receptionist', 'Menajera')),
+id_manager number (5),
+constraint fk_manager_angajat foreign key (id_manager) references angajati_hotel(id_angajat)
+);
+
+create table rezervari(
+id_rezervare number(7) primary key,
+data_rezervare date default sysdate,
+modalitate_plata varchar2(2) check (modalitate_plata in ('CASH', 'CARD')),
+id_turist number (5), 
+id_angajat number (6),
+constraint fk_turisti_rezervari foreign key (id_turist) references turisti(id_turist), 
+constraint fk_angajati_rezervari foreign key (id_angajat) references angajati_hotel(id_angajat)
+);
+
+create table detalii_rezervare( 
+id_rezervare number (7) ,
+id_camera number (4), 
+data_checkin date, 
+data_checkout date,
+constraint ck_data check(data_checkout > data_checkin),
+constraint pk_detalii_rezervare primary key(id_rezervare, id_camera),
+constraint fk_rezervari_detalii foreign key (id_rezervare) references rezervari(id_rezervare), 
+constraint fk_camere_detalii foreign key (id_camera) references camere(id_camera)
+);
+
+
+-- pentru tipuri de camera 
+insert into tipuri_camere values (1, 'STANDARD', 200, 1);
+insert into tipuri_camere values (2, 'DELUXE', 350, 2);
+insert into tipuri_camere values (3, 'SUITE', 800, 4);
+insert into tipuri_camere values (4, 'STANDARD', 220, 2);
+insert into tipuri_camere values (5, 'DELUXE', 380, 2);
+insert into tipuri_camere values (6, 'SUITE', 850, 3);
+insert into tipuri_camere values (7, 'STANDARD', 180, 1);
+insert into tipuri camere values (8, 'DELUXE', 400, 3);
+insert into tipuri_camere values (9, 'SUITE', 1500, 4);
+insert into tipuri camere values (10, 'STANDARD', 250, 3);
+
+
+--pentru camere
+
+insert into camere values (101, 1, 'NU', 1);
+insert into camere values (102, 1, 'NU', 2);
+insert into camere values (103, 1, 'NU', 1);
+insert into camere values (104, 1, 'NU', 4) ;
+insert into camere values (105, 1, 'DA', 7);
+
+insert into camere values (201, 2, 'NU', 2);
+insert into camere values (202, 2, 'DA', 2);
+insert into camere values (203, 2, 'NU', 2);
+insert into camere values (204, 2, 'DA', 5);
+insert into camere values (205, 2, 'DA', 2);
+
+insert into camere values (301, 3, 'DA', 3);
+insert into camere values (302, 3, 'DA', 3);
+insert into camere values (303, 3, 'DA', 6);
+insert into camere values (304, 3, 'NU', 3);
+
+insert into camere values (401, 4, 'DA', 8);
+insert into camere values (402, 4, 'DA', 8);
+insert into camere values (403, 4, 'NU', 9);
+insert into camere values (404, 4, 'NU', 1);
+
+--pentru angajati
+
+insert into angajati_hotel (id_angajat, nume, prenume, functie, salariu, data_angajare, id_manager) 
+values (1, 'Chira', 'Daria', 'Manager', 9000, to_date( '01-01-2015', 'DD-MM-YYYY' ), NULL);
+
+insert into angajati_hotel (id_angajat, nume, prenume, functie, salariu, data_angajare, id_manager)
+values (2, 'Chiceanu', 'Razvan', 'Receptionist', 4500, to_date( '15-03-2018', 'DD-MM-YYYY' ), 1);
+
+insert into angajati_hotel (id_angajat, nume, prenume, functie, salariu, data_angajare, id_manager)
+values (3, 'Juganaru', 'Alexia', 'Receptionist', 4200, to_date( '20-05-2019', 'DD-MM-YYYY'), 1);
+
+insert into angajati_hotel (id_angajat, nume, prenume, functie, salariu, data_angajare, id_manager) 
+values (4, 'Cioaca', 'Maria', 'Receptionist', 4000, to_date( '10-08-2021', 'DD-MM-YYYY'), 1);
+
+insert into angajati_hotel (id_angajat, nume, prenume, functie, salariu, data_angajare, id_manager) 
+values (5, 'Chita', 'Andrei', 'Menajera', 3200, to_date('10-10-2020', 'DD-MM-YYYY'), 1);
+
+insert into angajati_hotel (id_angajat, nume, prenume, functie, salariu, data_angajare, id_manager)
+values (6, 'Chirculescu', 'Victor', 'Menajera', 3100, to_date( '05-02-2022', 'DD-MM-YYYY'), 1);
+
+insert into angajati_hotel (id_angajat, nume, prenume, functie, salariu, data_angajare, id_manager)
+values (7, 'Popa', 'Elena', 'Receptionist', 3900, to_date( '12-09-2022', 'DD-MM-YYYY'), 1);
+
+insert into angajati_hotel (id_angajat, nume, prenume, functie, salariu, data_angajare, id_manager)
+values (8, 'Marin', 'George', 'Menajera', 3000, to_date( '01-02-2023', 'DD-MM-YYYY'), 1);
+
+insert into angajati_hotel (id_angajat, nume, prenume, functie, salariu, data_angajare, id_manager)
+values (9, 'Dinu', 'Corina', 'Receptionist', 4100, to_date( '15-06-2021', 'DD-MM-YYYY'), 1);
+
+insert into angajati_hotel (id_angajat, nume, prenume, functie, salariu, data_angajare, id_manager)
+values (10, 'Stancu', 'Mihai', 'Menajera', 3150, to_date( '20-11-2020', 'DD-MM-YYYY'), 1);
+
+insert into angajati_hotel (id_angajat, nume, prenume, functie, salariu, data_angajare, id_manager)
+VALUES (11, 'Voinea', 'Carmen', 'Receptionist', 3800, to_date('05-01-2024', 'DD-MM-YYYY'), 1); 
+
+insert into angajati_hotel (id_angajat, nume, prenume, functie, salariu, data_angajare, id_manager)
+values (12,'Radu','Ionut', 'Menajera', 3050, TO_DATE( '10-03-2023', 'DD-MM-YYYY'), 1);
+
+--pentru turisti
+
+insert into turisti values (500, 'Vacaru', 'Aniela', '0724111927', 'aniela@gmail.com');
+insert into turisti values (501,'Avram', 'Delia', '0745306494', 'avramdelia@yahoo.com');
+insert into turisti values (502,'Adrian', 'Silviu', '0785166579', 'adrian.s@rocketmail.com');
+insert into turisti values (503,'Ioana', 'Roxana', '0762848919', 'ioanarox@hotmail.com');
+insert into turisti values (504,'Ion', 'Codrin', '0775348919', 'ion.c@gmail.com');
+insert into turisti values (505,'Alex', 'Ciprian', '0762647568', 'cipi.alex@hotmail.com');
+insert into turisti values (506,'Lascar', 'Catargiu', '0762347659', 'catar.giu@mail.com');
+insert into turisti values (507,'Nistor', 'Irina', '0755070654', 'irina@gmail.com');
+insert into turisti values (508,'Costea', 'Sorin','0766000653', 'sorin@mail.com');
+insert into turisti values (509,'Diaconu', 'Maria', '0774538666', 'maria.d@amail.com');
+insert into turisti values (510,'Florea','Cristian', '0788053877', 'cristi.f@omail.com');
+insert into turisti values (511,'Manole', 'Raluca', '0799036518', 'raluca@gmail.com');
+insert into turisti values (512, 'Toma', 'Alexandru', '0724357298', 'alex.t@yahoo.com');
+insert into turisti values (513,'Serban', 'Andreea','0735372816','andreea@mail.com');
+insert into turisti values (514,'Mihai', 'Liviu','0778954816','mih.liv@mail.com');
+
+commit;
+
+--modificare pentru tabela rezervari
+
+alter table rezervari modify modalitate_plata varchar2(10) check (modalitate_plata in ('CASH', 'CARD'));
+
+
+insert into rezervari values (1001, to_date( '01-12-2023','DD-MM-YYYY'), 'CARD', 500, 4);
+insert into rezervari values (1002, to_date( '05-12-2023','DD-MM-YYYY'), 'CASH', 501, 4);
+insert into rezervari values (1003, to_date( '10-01-2024','DD-MM-YYYY'), 'CARD', 502, 5);
+insert into rezervari values (1004, to_date( '15-01-2024','DD-MM-YYYY'), 'CASH', 500, 3);
+insert into rezervari values (1015, to_date( '06-11-2020','DD-MM-YYYY'), 'CASH', 503, 3);
+insert into rezervari values (1005, to_date( '01-02-2024','DD-MM-YYYY' ), 'CARD', 504, 7);
+insert into rezervari values (1006, to_date( '03-02-2024','DD-MM-YYYY'), 'CASH', 505, 7);
+insert into rezervari values (1007, to_date('10-02-2024','DD-MM-YYYY'), 'CARD' , 506, 2);
+insert into rezervari values (1008, to_date( '14-02-2024','DD-MM-YYYY'), 'CARD', 507, 3);
+insert into rezervari values (1009, to_date( '20-02-2024','DD-MM-YYYY'), 'CASH', 508, 9);
+insert into rezervari values (1010, to_date('01-03-2024','DD-MM-YYYY'), 'CASH', 509, 11);
+insert into rezervari values (1011, to_date('05-03-2024','DD-MM-YYYY'), 'CARD', 510, 4);
+insert into rezervari values (1012, to_date( '08-03-2024','DD-MM-YYYY'),'CARD', 511, 7);
+insert into rezervari values (1013, to_date ('15-03-2024','DD-MM-YYYY'), 'CASH', 512, 9);
+insert into rezervari values (1014, to_date( '20-03-2024','DD-MM-YYYY'), 'CARD', 513, 11);
+
+
+--pt detalii rezervare:
+
+
+insert into detalii rezervare values (1001, 101, to_date('20-12-2023', 'DD-MM-YYYY'), to_date('25-12-2023', 'DD-MM-YYYY'));
+insert into detalii rezervare values (1001, 102, to_date('20-12-2023', 'DD-MM-YYYY'), to_date('25-12-2023', 'DD-MM-YYYY'));
+insert into detalii rezervare values (1002, 301, to_date('30-12-2023', 'DD-MM-YYYY'), to_date('02-01-2024', 'DD-MM-YYYY'));
+insert into detalii_rezervare values (1003, 201, to_date('15-02-2024', 'DD-MM-YYYY'), to_date('18-02-2024', 'DD-MM-YYYY'));
+insert into detalii_rezervare values (1005, 103, to_date('01-02-2024','DD-MM-YYYY'), to_date('05-02-2024','DD-MM-YYYY'));
+insert into detalii_rezervare values (1006, 203, to_date('03-02-2024','DD-MM-YYYY'), to_date('06-02-2024','DD-MM-YYYY'));
+insert into detalii_rezervare values (1007, 401, to_date('10-02-2024','DD-MM-YYYY'), to_date('12-02-2024','DD-MM-YYYY'));
+insert into detalii_rezervare values (1008, 105, to_date('14-02-2024','DD-MM-YYYY'), to_date('18-02-2024','DD-MM-YYYY'));
+insert into detalii_rezervare values (1010, 204, to_date('01-03-2024','DD-MM-YYYY'), to_date('03-03-2024','DD-MM-YYYY'));
+insert into detalii_rezervare values (1011, 402, to_date('05-03-2024','DD-MM-YYYY'), to_date('10-03-2024','DD-MM-YYYY'));
+insert into detalii_rezervare values (1012, 104, to_date('08-03-2024','DD-MM-YYYY'), to_date('11-03-2024','DD-MM-YYYY'));
+insert into detalii_rezervare values (1013, 205, to_date('15-03-2024','DD-MM-YYYY'), to_date('17-03-2024','DD-MM-YYYY'));
+insert into detalii_rezervare values (1014, 304, to_date('20-03-2024','DD-MM-YYYY'), to_date('23-03-2024','DD-MM-YYYY'));
+
+COMMIT;
+
+--marim salariul receptionistilor 
+update angajati_hotel
+set salariu=salariu*1.10
+where functie= 'Receptionist';
+
+--schimbam nr de telefon al unui turist al carui nr a fost scris gresit
+update turisti
+set nr_telefon='0722296886'
+where nume='Ioana' and prenume='Roxana';
+
+--crearea stergerea si recuperarea unei tabele
+create table hotel_test(
+id_hotell number (1) primary key
+);
+
+drop table hotel_test;
+
+flashback table hotel_test to before drop;
+
+--1.Afisarea angajatilor cu salariul mai mare de 4000 de lei 
+select * from angajati_hotel
+where salariu>4000;
+
+--2.Clasificarea camerelor dupa pret cu CASE
+
+select denumire_camera, pret_noapte,
+       case 
+           when pret_noapte < 300 then 'Economy'
+           when pret_noapte between 300 and 600 then 'Standard'
+           else 'Luxury'
+       end as categorie_pret
+from tipuri_camere;
+
+--3.Afisarea detaliilor despre rezervari si turisti 
+select t.nume, t.prenume, r.data_rezervare, r.modalitate_plata
+from turisti t, rezervari r
+where t.id_turist = r.id_turist; 
+
+commit;
+
+
+
+--4.Vedem care angajat a procesat rezervarea 
+select a.nume as angajat, t.nume as turist, r.data_rezervare
+from angajati_hotel a, rezervari r, turisti t
+where a.id_angajat = r.id_angajat
+and r.id_turist = t.id_turist;
+
+--5.	Afisam nr camerei si pretul pt toate camerele SUITE
+select c.id_camera, c.etaj, t.pret_noapte
+from camere c, tipuri_camere t
+where c.id_tip = t.id_tip
+and t.denumire_camera = 'SUITE';
+
+--6.	Se afiseaza toti turistii iar dacă au rezervări, afișează și ID-ul rezervării
+select t.nume, r.id_rezervare
+from turisti t left outer join rezervari r on t.id_turist = r.id_turist; 
+
+--7.	Se selectează perechi de camere aflate la același etaj.
+select c1.id_camera as camera_1, c2.id_camera AS camera_2, c1.etaj
+from camere c1, camere c2
+where c1.etaj = c2.etaj 
+and c1.id_camera < c2.id_camera; 
+
+--8.	Afișează numele cu majuscule și prenumele doar cu prima literă mare (fct single-row) 
+select upper(nume) || ' ' || initcap(prenume) as nume_complet
+from turisti;
+
+--9.	Afișează primele 5 caractere din adresa de email. (fct caracter)
+select email, substr(email, 1, 5) as inceput_email
+from turisti; 
+
+--10.	Rotunjim salariul dupa o crestere de 15.5% (fct numerice)
+select nume, salariu, round(salariu * 1.155, 0) AS salariu_marit
+from angajati_hotel; 
+
+--11.	Afiseaza angajatii care au nr imparla id (fct numeric)
+select id_angajat, nume
+from angajati_hotel
+where mod(id_angajat, 2) != 0; 
+
+--12.	Cate camere exista in hotel
+select count(*) as total_camere from camere; 
+
+--13.	Fondul total de salarii lunar
+select sum(salariu) as total_salarii from angajati_hotel;
+
+--14.	Prețul mediu al unei nopți de cazare
+select avg(pret_noapte) as pret_mediu from tipuri_camere;
+
+--15.	Cel mai mic și cel mai mare salariu.
+select min(salariu) as salariu_minim, max(salariu) as salariu_maxim
+from angajati_hotel;
+
+--16.	Numărul de camere pe fiecare etaj.
+select etaj, count(*) as nr_camere
+from camere
+group by etaj
+order by etaj;
+
+--17.	Tipurile de camere care au prețul mediu peste 400 RON
+select denumire_camera, avg(pret_noapte)
+from tipuri_camere
+group by denumire_camera
+having avg(pret_noapte) > 400; 
+
+--18.	Listă cu numele și prenumele tuturor persoanelor din baza de date (Angajați + Turiști)
+select nume, prenume from angajati_hotel
+union
+select nume, prenume from turisti; 
+
+--19.	Afișează ID-urile turiștilor care sunt în baza de date, dar NU au făcut nicio rezervare
+select id_turist from turisti
+minus
+select id_turist from rezervari; 
+
+--20.	Afișează ID-urile camerelor care există si care apar și în detalii_rezervare
+select id_camera from camere
+intersect
+select id_camera from detalii_rezervare; 
+
+--21.	Prescurtăm modalitatea de plată: C=Card, N=Numerar
+select id_rezervare, modalitate_plata,
+decode(modalitate_plata, 'Card', 'C', 'Cash', 'N') as cod_plata
+from rezervari; 
+
+--22.	Afișează angajații care au salariul mai mare decât media salariilor din tot hotelul
+select nume, salariu
+from angajati_hotel
+where salariu > (select avg(salariu) from angajati_hotel); 
+
+--23.	Aflăm prețul maxim și apoi afișăm detaliile camerei cu acel preț.(subcerere cu from)
+select denumire_camera, pret_noapte
+from tipuri_camere
+where pret_noapte = (select max(pret_noapte) from tipuri_camere); 
+
+--24.	Rezervările făcute de turiștii care au 'yahoo' în email
+select * from rezervari
+where id_turist in (select id_turist from turisti where email like '%yahoo%');
+
+
+--25.	Turiștii care au făcut cel puțin o rezervare
+select nume, prenume
+from turisti t
+where exists (select 1 from rezervari r where r.id_turist = t.id_turist); 
+
+--26.	Afișează ierarhia angajaților, pornind de la Manager
+select level, lpad(' ', (level-1)*4) || nume || ' ' || prenume as angajat, functie
+from angajati_hotel
+connect by prior id_angajat = id_manager
+start with id_manager is null; 
+
+--27.	Arată drumul de la șeful cel mare până la angajat.
+select nume, SYS_CONNECT_BY_PATH(nume, '/') as lant_ierarhic
+from angajati_hotel
+connect by prior id_angajat = id_manager
+start with id_manager is null;  
+
+--28.	Găsește toți angajații al căror nume se termină în litera 'u’
+select * from angajati_hotel
+where nume like '%u'; 
+
+--29.	Ordonează angajații după funcție, iar în cadrul funcției, descrescător după salariu.
+select nume, functie, salariu
+from angajati_hotel
+order by functie asc, salariu desc; 
+
+--30.	Afișează etajele unice pe care există camere.
+select distinct etaj from camere; 
+
+--31.	Să se afișeze numele turistului și data la care a făcut rezervarea.
+select t.nume, t.prenume, r.data_rezervare
+from turisti t, rezervari r
+where t.id_turist = r.id_turist; 
+
+--Gestiunea altor obiecte ale bazei de date:
+
+--Vederi:
+create view v_sef as
+select nume, prenume, functie
+from angajati_hotel
+where functie = 'Manager';
+
+select * from v_sef; 
+
+--Indecsi:
+create index idx_nr_telefon_turist on turisti(nr_telefon); 
+
+--Sinonime:
+create synonym tip for tipuri_camere; 
+select * from tip; 
+
+--Secvente
+create sequence seq_num
+start with 1
+increment by 1;
+
+
+
+
+
+
+--STRUCTURI DE CONTROL:
+--1. vom parcurge toti angajatii hotelului si vom afisa salariul si functia lor
+SET SERVEROUTPUT ON;
+DECLARE
+    v_salariu angajati_hotel.salariu%type;
+    v_nume angajati_hotel.nume%type;
+    v_functie angajati_hotel.functie%type;
+    i number not null:=1;
+    v_min angajati_hotel.id_angajat%type;
+    v_max v_min%type;
+BEGIN
+    select min(id_angajat), max(id_angajat)
+    into v_min, v_max
+    from angajati_hotel;
+    i:=v_min;
+    FOR i IN v_min..v_max LOOP
+        select nume, salariu, functie
+        into v_nume, v_salariu, v_functie
+        from angajati_hotel
+        where id_angajat= i;
+        dbms_output.put_line(i||' - '||v_nume||' este: '||v_functie||' si are salariul: ' ||v_salariu);
+    END LOOP;
+
+END;
+/
+
+--2.Vom vedea care este salariul angajatului cu id ul citit de la tastatura, in functie de salariul lui,
+--vom calcula si recomanda o marire de salariu
+
+SET SERVEROUTPUT ON;
+DECLARE
+    v_sal angajati_hotel.salariu%type;
+    v_nume angajati_hotel.nume%type;
+    v_prenume angajati_hotel.prenume%type;
+    v_id angajati_hotel.id_angajat%type:=&ida;
+BEGIN
+    select nume, prenume, salariu
+    into v_nume, v_prenume, v_sal
+    from angajati_hotel
+    where id_angajat=v_id;
+    dbms_output.put_line(v_nume||' '||v_prenume||' are salariul: ' ||v_sal);
+    
+    if v_sal < 3000 then 
+        dbms_output.put_line('RECOMAND MARIRE DE 15%');
+    elsif v_sal between 3000 and 5000 then 
+        dbms_output.put_line('RECOMAND MARIRE DE 10%');
+    else
+        dbms_output.put_line('RECOMAND MARIRE DE 5%');
+    end if;
+END;
+/
+
+--3.parcurgem toti turistii si afisam turistii care au nr de telefon care se termina in 9
+SET SERVEROUTPUT ON;
+DECLARE 
+    v_nume turisti.nume%type;
+    v_prenume turisti.prenume%type;
+    v_tel turisti.nr_telefon%type;
+    v_min turisti.id_turist%type;
+    v_max v_min%type;
+    t number not null:= 1;
+BEGIN
+    select min(id_turist), max(id_turist)
+    into v_min, v_max
+    from turisti;
+    t:=v_min;
+    LOOP
+        select nume, prenume, nr_telefon
+        into v_nume, v_prenume, v_tel
+        from turisti
+        where id_turist=t;
+        
+        if v_tel like '%9' then
+            dbms_output.put_line(v_nume|| ' ' ||v_prenume||' are un numar de telefon care se termina in 9: ' ||v_tel);
+        end if;
+        
+        t:=t+1;
+        EXIT WHEN t>v_max;
+    END LOOP;
+END;
+/
+
+
+
+--CURSORI
+
+--1.Marim salariul cub 10% pentru toti angajatii cu funcita pe care o introducem noi 
+set serveroutput on
+accept functie prompt 'Introduceti functia: '
+declare
+    v_funct angajati_hotel.functie%type:='&functie';
+
+begin 
+    update angajati_hotel
+    set salariu=salariu*1.10
+    where functie=v_funct;
+    
+    if sql%found then 
+    dbms_output.put_line('S au marit salariile pentru angajatii cu functia: ' ||v_funct);
+    else 
+    dbms_output.put_line('Nu exista angajati cu functia de: '||v_funct);
+    end if;
+
+end;
+/
+
+
+--2.Afisam detaliile camerelor de pe un anumit etaj
+set serveroutput on 
+declare     
+    
+    CURSOR c(p camere.etaj%type ) is select  c.id_camera, c.vedere_mare, tc.denumire_camera, tc.pret_noapte, tc.capacitate 
+                from camere c, tipuri_camere tc
+                where c.id_tip=tc.id_tip
+                and etaj=p;
+    v_idc camere.id_camera%type;
+    v_vm camere.vedere_mare%type;
+    v_dc tipuri_camere.denumire_camera%type;
+    v_pn tipuri_camere.pret_noapte%type;
+    v_cap tipuri_camere.capacitate%type;
+    
+begin
+    open c(&p);
+    loop
+        fetch c into v_idc, v_vm, v_dc, v_pn, v_cap;
+        exit when c%notfound;
+        DBMS_OUTPUT.PUT_LINE('Camera '||v_idc||'. '||v_dc|| ' are capacitatea '||v_cap||' pretul: '||v_pn||' are vedere la mare: '||v_vm);
+   end loop;
+   close c;
+end;
+/
+commit
+
+
+--3.Calculam salariul mediu si numarul de angajati de pe fiecare functie
+set serveroutput on 
+begin
+    for c in(   select round(avg(salariu),2) as medie_sal, count(id_angajat) as nr_angajati, functie
+                from angajati_hotel 
+                group by functie)
+    loop 
+    dbms_output.put_line('Functia ' ||c.functie||' are '||c.nr_angajati||' angajati si salariul mediu de '||c.medie_sal||' lei');
+    end loop;
+end;
+/
+
+
+
+--4.Afisam turistii si detaliile despre rezervarilile fiecaruia
+set serveroutput on 
+begin
+    for c in (select nume, prenume, nr_telefon, email, id_turist 
+              from turisti )
+    loop
+        dbms_output.put_line('Turistul '||c.nume||' '||c.prenume||' cu nr de telefon: '||c.nr_telefon||' si emailul: '||c.email);
+        for r in( select id_rezervare, data_rezervare
+                  from rezervari
+                  where id_turist=c.id_turist)
+        loop
+            dbms_output.put_line('Rezervarea: '||r.id_rezervare||' de pe data: '||r.data_rezervare);
+        end loop;
+     end loop;     
+end;
+/
+
+--5.vedem cati turisti au mailul cu @yahoo ii afisam si ii numaram la sfarsit
+set serveroutput on 
+declare
+    cursor c is select id_turist, nume, prenume, email
+                from turisti 
+                where email like '%@yahoo.com%';
+    v_id turisti.id_turist%type;
+    v_nume turisti.nume%type;
+    v_prenume turisti.prenume%type;
+    v_email turisti.email%type;
+begin 
+     dbms_output.put_line('Acestia sunt toti turistii care au emailul cu yahoo: ');
+    open c;
+    loop
+        fetch c into v_id, v_nume, v_prenume, v_email;
+    exit when c%notfound;
+    if c%found then 
+        dbms_output.put_line(c%rowcount||'. '||v_nume|| ' '||v_prenume||' '||v_email);
+    end if;
+    end loop;
+    dbms_output.put_line('In total sunt '||c%rowcount||' astfel de turisti.');
+end;
+/
+
+--6.calculam costul total pentru fiecare rezervare facuta
+set serveroutput on
+declare
+    cursor c is select dr.id_rezervare, tc.denumire_camera, (dr.data_checkout-dr.data_checkin) as nr_nopti, tc.pret_noapte,(dr.data_checkout-dr.data_checkin)*tc.pret_noapte as cost_total
+                from detalii_rezervare dr, camere c, tipuri_camere tc
+                where dr.id_camera = c.id_camera
+                and c.id_tip = tc.id_tip;
+    v_id_rez   detalii_rezervare.id_rezervare%TYPE;
+    v_denumire tipuri_camere.denumire_camera%TYPE;
+    v_nopti    NUMBER;
+    v_pret     tipuri_camere.pret_noapte%TYPE;
+    v_total    NUMBER;
+begin
+    open c;
+     loop
+        fetch c into v_id_rez, v_denumire, v_nopti, v_pret, v_total;
+     exit when c%notfound;
+        dbms_output.put_line('Rezervarea ' || v_id_rez || '  ' || v_denumire || '  pentru ' || v_nopti || ' nopti  ' || v_pret || ' lei = Total: ' || v_total || ' lei.');
+    end loop;
+    if c%rowcount=0 then
+        dbms_output.put_line('Nu exista detalii de rezervare in baza de date.');
+    else
+        dbms_output.put_line('Au fost generate ' || c%rowcount || ' note de plata.');
+    end if;
+
+    close c;
+end;
+/
+ 
+commit;
+
+
+
+--EXCEPTII
+--1. Vedem cat costa pe noapte un anumit fel de camere(standard, deluxe, suite), citita de la tastatura
+
+SET SERVEROUTPUT ON;
+ACCEPT c PROMPT 'Introduceți tipul camerei: '
+
+DECLARE
+    v_denumire tipuri_camere.denumire_camera%TYPE := '&c';
+    v_pret tipuri_camere.pret_noapte%TYPE;
+BEGIN
+
+    select pret_noapte 
+    into v_pret
+    from tipuri_camere
+    where denumire_camera = v_denumire;
+    
+    DBMS_OUTPUT.PUT_LINE('Tariful pentru camera ' || v_denumire|| ' este: ' || v_pret);
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Eroare: Nu am găsit niciun tip de cameră cu denumirea introdusă!');
+    WHEN TOO_MANY_ROWS THEN
+        DBMS_OUTPUT.PUT_LINE('Eroare: Baza de date conține mai multe tipuri de camere cu acest nume');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('A apărut o eroare neprevăzută: ' || SQLERRM);
+END;
+/
+
+--2. dam bonusuri angajatilor, daca au salariul mai mare de 10000 facem o exceptie pt ca salariul este prea mare pt bugetul alocat salariatilor
+
+SET SERVEROUTPUT ON;
+DECLARE
+    CURSOR c IS select id_angajat, nume, salariu 
+                         from angajati_hotel;
+    
+    v_salariu_nou angajati_hotel.salariu%TYPE;
+    buget_depasit EXCEPTION; 
+    
+BEGIN 
+    FOR i IN c LOOP
+        v_salariu_nou := i.salariu * 1.25;
+ 
+        IF v_salariu_nou > 10000 THEN
+
+            RAISE buget_depasit; 
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('Angajat: ' || i.nume || ' - Salariu marit: ' || v_salariu_nou);
+        END IF;
+        
+    END LOOP;
+
+EXCEPTION
+    WHEN buget_depasit THEN
+        DBMS_OUTPUT.PUT_LINE(' S-a oprit procesarea!');
+        DBMS_OUTPUT.PUT_LINE('Creșterile au depășit salariul maxim admis (10.000 RON) pentru un angajat.');
+    WHEN OTHERS THEN
+         DBMS_OUTPUT.PUT_LINE('Eroare generală: ' );
+END;
+/
+
+
+--3. mutam o rezervare de pe numele unui turist pe numele altui turist
+SET SERVEROUTPUT ON;
+ACCEPT r PROMPT 'Introduceti ID-ul rezervarii pe care doriti sa o mutati: '
+ACCEPT n PROMPT 'Introduceti ID-ul noului turist care preia rezervarea: '
+
+DECLARE
+    v_id_rez  rezervari.id_rezervare%TYPE := &r;
+    v_id_nou  turisti.id_turist%TYPE := &n;
+
+    turist_inexistent EXCEPTION;
+    PRAGMA EXCEPTION_INIT(turist_inexistent, -2291);
+    
+BEGIN
+    UPDATE rezervari
+    SET id_turist = v_id_nou
+    WHERE id_rezervare = v_id_rez;
+    IF SQL%ROWCOUNT = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('Nu s-a facut nicio modificare. Rezervarea cu ID-ul ' || v_id_rez || ' nu exista.');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Rezervarea a fost transferata cu succes catre turistul cu ID: ' || v_id_nou);
+    END IF;
+    
+    ROLLBACK;
+    
+EXCEPTION
+    WHEN turist_inexistent THEN
+        DBMS_OUTPUT.PUT_LINE(' Transferul a esuat!');
+        DBMS_OUTPUT.PUT_LINE('Motiv: Turistul cu ID-ul ' || v_id_nou || ' nu exista in nomenclatorul de turisti.');
+        DBMS_OUTPUT.PUT_LINE('Mesaj tehnic: ' || SQLERRM);
+END;
+/
+
+
+
+--4.vedem daca un turist poate sa si anuleze rezervarea in functie de politica(trebuie sa fie cu cel putin inainte de checkin)
+SET SERVEROUTPUT ON;
+ACCEPT r PROMPT 'Introduceti ID-ul rezervarii pe care doriti sa o anulati: '
+
+DECLARE
+    v_id             rezervari.id_rezervare%TYPE := &r;
+    v_data_checkin   detalii_rezervare.data_checkin%TYPE;
+    v_denumire_cam   tipuri_camere.denumire_camera%TYPE;
+    v_zile_ramase    NUMBER;
+BEGIN
+    select dr.data_checkin, tc.denumire_camera 
+    into v_data_checkin, v_denumire_cam
+    from detalii_rezervare dr, camere c, tipuri_camere tc
+    where dr.id_camera = c.id_camera 
+      and c.id_tip = tc.id_tip
+      and dr.id_rezervare = v_id;
+      
+    v_zile_ramase := TRUNC(v_data_checkin) - TRUNC(SYSDATE);
+    
+    DBMS_OUTPUT.PUT_LINE('Rezervare gasita pentru camera: ' || v_denumire_cam);
+    DBMS_OUTPUT.PUT_LINE('Data check-in: ' || TO_CHAR(v_data_checkin, 'DD-MM-YYYY') || ' (in ' || v_zile_ramase || ' zile).');
+ 
+    IF v_zile_ramase < 3 THEN
+        RAISE_APPLICATION_ERROR(-20010, 'POLITICA HOTEL: Anularea respinsa! Au ramas mai putin de 3 zile pana la check-in.');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('SUCCES: Rezervarea a fost anulata fara penalizari.');
+    END IF;
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('EROARE CAUTARE: Nu am gasit nicio rezervare cu ID-ul ' || v_id || ' in sistem.');
+END;
+/
+
+
+
+
+
+
